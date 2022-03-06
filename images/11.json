@@ -1,0 +1,25 @@
+{
+    "name": "sinful-xavier",
+    "description": "A drawing of sinful xavier",
+    "image": "ipfs://QmbayKVRejenuZvBScjwq1rCEZrMVrmyV74TnF9XF6QC1f/11.svg",
+    "attributes": [
+        {
+            "trait_type": "Beard",
+            "value": "Short"
+        },
+        {
+            "trait_type": "Eyes",
+            "value": "Open"
+        },
+        {
+            "display_type": "boost_number",
+            "trait_type": "Aqua Power",
+            "value": 40
+        },
+        {
+            "display_type": "boost_percentage",
+            "trait_type": "Stamina Increase",
+            "value": 10
+        }
+    ]
+}

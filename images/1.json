@@ -1,0 +1,15 @@
+{
+    "name": "sinful-xavier",
+    "description": "A drawing of sinful xavier",
+    "image": "ipfs://QmbayKVRejenuZvBScjwq1rCEZrMVrmyV74TnF9XF6QC1f/1.svg",
+    "attributes": [
+        {
+            "trait_type": "Beard",
+            "value": "Short"
+        },
+        {
+            "trait_type": "Eyes",
+            "value": "Open"
+        }
+    ]
+}

@@ -12,7 +12,3 @@ typechain
 #Hardhat files
 cache
 artifacts
-
-#images
-images
-images-src
