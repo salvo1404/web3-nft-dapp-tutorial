@@ -1,1 +1,17 @@
-{"name":"harry-tevin","description":"A drawing of harry tevin","image":"ipfs://QmbayKVRejenuZvBScjwq1rCEZrMVrmyV74TnF9XF6QC1f/9.svg","attributes":[{"trait_type":"Beard","value": "Short", "rarity":0.5}, {"trait_type":"Eyes","value": "Open", "rarity":0.5}]}
+{
+    "name": "harry-tevin",
+    "description": "A drawing of harry tevin",
+    "image": "ipfs://QmbayKVRejenuZvBScjwq1rCEZrMVrmyV74TnF9XF6QC1f/9.svg",
+    "attributes": [
+        {
+            "trait_type": "Beard",
+            "value": "Short",
+            "rarity": 0.5
+        },
+        {
+            "trait_type": "Eyes",
+            "value": "Open",
+            "rarity": 0.5
+        }
+    ]
+}
