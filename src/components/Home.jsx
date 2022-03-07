@@ -3,16 +3,20 @@ import { useEffect, useState } from 'react';
 
 import { ethers } from 'ethers';
 import FiredGuys from '../artifacts/contracts/MyNFT.sol/FiredGuys.json';
+import FellasToken from '../artifacts/contracts/FellasToken.sol/FellasToken.json';
 
-const contractAddress = 'YOUR_DEPLOYED_CONTRACT_ADDRESS';
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-// get the end user
+// get the signer
 const signer = provider.getSigner();
 
-// get the smart contract
-const contract = new ethers.Contract(contractAddress, FiredGuys.abi, signer);
+// get the smart contract (MyNFT Contract)
+// const contract = new ethers.Contract(contractAddress, FiredGuys.abi, signer);
+// get the smart contract (FellasToken Contract)
+const contract = new ethers.Contract(contractAddress, FellasToken.abi, signer);
+
 
 
 function Home() {
@@ -24,7 +28,7 @@ function Home() {
 
   const getCount = async () => {
     const count = await contract.count();
-    console.log(parseInt(count));
+    console.log('Token count = ' + parseInt(count));
     setTotalMinted(parseInt(count));
   };
 
@@ -32,12 +36,18 @@ function Home() {
     <div>
       <WalletBalance />
 
-      <h1>Fired Guys NFT Collection</h1>
+      <h1>Fellas Token NFT Collection</h1>
+      <ul>
+        <li>Free Mint only VIP</li>
+        <li>Whitelist (first 20) at ETH 0.0001</li>
+        <li>Mint at ETH 0.0005</li>
+      </ul>
       <div className="container">
         <div className="row">
-          {Array(totalMinted + 1)
+          {Array(totalMinted + 2)
             .fill(0)
             .map((_, i) => (
+              i != 0 &&
               <div key={i} className="col-sm">
                 <NFTImage tokenId={i} getCount={getCount} />
               </div>
@@ -49,10 +59,12 @@ function Home() {
 }
 
 function NFTImage({ tokenId, getCount }) {
-  const contentId = 'Qmdbpbpy7fA99UkgusTiLhMWzyd3aETeCFrz7NpYaNi6zY';
-  const metadataURI = `${contentId}/${tokenId}.json`;
-  const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.png`;
-//   const imageURI = `img/${tokenId}.png`;
+  const [offer, setOffer] = useState('0.0005');
+  const handleOfferChange = (e) => setOffer(e.target.value);
+
+  const contentId = import.meta.env.VITE_CONTENT_ID;
+  const metadataURI = `ipfs://${contentId}/${tokenId}.json`;
+  const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.svg`;
 
   const [isMinted, setIsMinted] = useState(false);
   useEffect(() => {
@@ -61,18 +73,65 @@ function NFTImage({ tokenId, getCount }) {
 
   const getMintedStatus = async () => {
     const result = await contract.isContentOwned(metadataURI);
-    console.log(result)
+    console.log('TokenID = ' + tokenId + ', IsContentOwned = ' + result);
     setIsMinted(result);
   };
 
   const mintToken = async () => {
-    const connection = contract.connect(signer);
-    const addr = connection.address;
-    const result = await contract.payToMint(addr, metadataURI, {
-      value: ethers.utils.parseEther('0.05'),
-    });
+    // Contract becomes owner
+    // const connection = contract.connect(signer);
+    // const addr = connection.address;
 
-    await result.wait();
+    try {
+        // User Address
+        const userAddress = await signer.getAddress();
+
+        const result = await contract.mintaUnPo(userAddress, metadataURI, {
+          value: ethers.utils.parseEther(offer),
+        });
+        await result.wait();
+    } catch (error) {
+        console.log(error.code)
+        alert(error.code);
+    }
+
+    getMintedStatus();
+    getCount();
+  };
+
+  const whitelistMint = async () => {
+
+    try {
+        // User Address
+        const userAddress = await signer.getAddress();
+
+        const result = await contract.whitelistMint(userAddress, metadataURI, {
+         
+          value: ethers.utils.parseEther(offer),
+        });
+        await result.wait();
+    } catch (error) {
+        console.log(error.code)
+        alert('Whitelist Minting is over');
+    }
+
+    getMintedStatus();
+    getCount();
+  };
+
+  const freeMint = async () => {
+    try {
+        // User Address
+        const userAddress = await signer.getAddress();
+        const result = await contract.freeMint(userAddress, metadataURI, {
+          value: ethers.utils.parseEther(offer),
+        });
+        await result.wait();
+    } catch (error) {
+        console.log(error.code)
+        alert(error.code);
+    }
+
     getMintedStatus();
     getCount();
   };
@@ -82,14 +141,40 @@ function NFTImage({ tokenId, getCount }) {
     alert(uri);
   }
   return (
-    <div className="card" style={{ width: '18rem' }}>
+    <div className="card" style={{ width: '18rem', margin: 10 }}>
       <img className="card-img-top" src={isMinted ? imageURI : 'img/placeholder.png'}></img>
       <div className="card-body">
         <h5 className="card-title">ID #{tokenId}</h5>
-        {!isMinted ? (
-          <button className="btn btn-primary" onClick={mintToken}>
-            Mint
-          </button>
+        
+        {!isMinted ? (  
+          <div className="row">
+            <div>
+            ETH: 
+            <input
+              type="number"
+              // defaultValue={offer}
+              value={offer}
+              onChange={handleOfferChange}
+            />
+            </div>
+            <p></p>
+            <div className="col-sm">
+              <button className="btn btn-primary" onClick={freeMint}>
+              Free Mint
+            </button>
+            </div>
+            <div className="col-sm">
+            <button className="btn btn-primary" onClick={whitelistMint}>
+              Whitelist
+            </button>
+            </div>
+            <div className="col-sm">
+            <button className="btn btn-primary" onClick={mintToken}>
+              Mint
+            </button>
+            </div>
+          </div>
+          
         ) : (
           <button className="btn btn-secondary" onClick={getURI}>
             Taken! Show URI
