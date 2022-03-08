@@ -108,4 +108,16 @@ contract FellasToken is ERC721, ERC721URIStorage, Ownable {
     function count() public view returns (uint256) {
         return _tokenIdCounter.current() - 1;
     }
+
+    function getBalance() public view returns (uint256) {
+        return (address(this).balance);
+    }
+
+    function withdraw() public payable onlyOwner {
+         payable(this.owner()).transfer(address(this).balance);
+     }
+
+    // function withdrawTo(address payable _to) public payable onlyOwner {
+    //     _to.transfer(address(this).balance);
+    // }
 }
