@@ -73,7 +73,7 @@ function NFTImage({ tokenId, getCount }) {
 
   const getMintedStatus = async () => {
     const result = await contract.isContentOwned(metadataURI);
-    console.log('TokenID = ' + tokenId + ', IsContentOwned = ' + result);
+    // console.log('TokenID = ' + tokenId + ', IsContentOwned = ' + result);
     setIsMinted(result);
   };
 
@@ -86,7 +86,7 @@ function NFTImage({ tokenId, getCount }) {
         // User Address
         const userAddress = await signer.getAddress();
 
-        const result = await contract.mintaUnPo(userAddress, metadataURI, {
+        const result = await contract.mintSingleFellas(userAddress, metadataURI, {
           value: ethers.utils.parseEther(offer),
         });
         await result.wait();

@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract FellasToken is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
+    uint256 public constant totalSupply = 8000;
 
     Counters.Counter private _tokenIdCounter;
 
@@ -22,14 +23,6 @@ contract FellasToken is ERC721, ERC721URIStorage, Ownable {
 
     function _baseURI() internal pure override returns (string memory) {
         return "ipfs://";
-    }
-
-    function safeMint(address to, string memory uri) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-        existingURIs[uri] = 1;
     }
 
     // The following functions are overrides required by Solidity.
@@ -54,19 +47,32 @@ contract FellasToken is ERC721, ERC721URIStorage, Ownable {
         return existingURIs[uri] == 1;
     }
 
-    function mintaUnPo(
+    function mintMultiFellas(address recipient, string[] memory URIs, uint256 num) public payable returns (uint256[] memory) {
+        require( num < 11, 'You can mint a maximum of 10' );
+        require( count() + num < totalSupply, 'Exceeds maximum supply' );
+        require( msg.value >= 0.0005 ether * num, 'Not enough ETH sent, check price' );
+
+        uint256[] memory itemIds = new uint256[](num);
+        for(uint256 i; i < num; i++){
+            itemIds[i] = mintSingleFellas(recipient, URIs[i]);
+        }
+
+        return itemIds;
+    }
+
+    function mintSingleFellas(
         address recipient,
         string memory metadataURI
     ) public payable returns (uint256) {
         require(existingURIs[metadataURI] != 1, 'NFT already minted!');
-        require (msg.value >= 0.0005 ether, 'Need to pay up!');
+        require (msg.value >= 0.0005 ether, 'Not enough ETH sent: check price.');
+        require(count() >= 0 && count() < totalSupply, "Exceeds token supply");
 
         uint256 newItemId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        existingURIs[metadataURI] = 1;
-
-        _mint(recipient, newItemId);
+        _safeMint(recipient, newItemId);
         _setTokenURI(newItemId, metadataURI);
+        existingURIs[metadataURI] = 1;
 
         return newItemId;
     }
@@ -76,14 +82,14 @@ contract FellasToken is ERC721, ERC721URIStorage, Ownable {
         string memory metadataURI
     ) public payable returns (uint256) {
         require(existingURIs[metadataURI] != 1, 'NFT already minted!');
-        require (msg.value >= 0.0001 ether, 'Need to pay up!');
+        require (msg.value >= 0.0001 ether, 'Not enough ETH sent: check price.');
         require (_tokenIdCounter.current() < 10, 'Whitelist mint is over!');
 
         uint256 newItemId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         existingURIs[metadataURI] = 1;
 
-        _mint(recipient, newItemId);
+        _safeMint(recipient, newItemId);
         _setTokenURI(newItemId, metadataURI);
 
         return newItemId;
@@ -94,12 +100,13 @@ contract FellasToken is ERC721, ERC721URIStorage, Ownable {
         string memory metadataURI
     ) public returns (uint256) {
         require(existingURIs[metadataURI] != 1, 'NFT already minted!');
+        require(count() >= 0 && count() <= totalSupply, "Exceeds token supply");
 
         uint256 newItemId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         existingURIs[metadataURI] = 1;
 
-        _mint(recipient, newItemId);
+        _safeMint(recipient, newItemId);
         _setTokenURI(newItemId, metadataURI);
 
         return newItemId;

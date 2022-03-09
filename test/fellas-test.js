@@ -16,7 +16,7 @@ describe("FellasToken", function () {
     expect(balance).to.equal(0);
 
     // Mint 1st token to the recipient
-    let newlyMintedToken = await fellasToken.mintaUnPo(recipient, metadataURI, { value: ethers.utils.parseEther('0.0005') });
+    let newlyMintedToken = await fellasToken.mintSingleFellas(recipient, metadataURI, { value: ethers.utils.parseEther('0.0005') });
     await newlyMintedToken.wait();
 
     // Verify there is 1 token minted
@@ -31,7 +31,7 @@ describe("FellasToken", function () {
 
     // Mint 2nd token to the recipient
     metadataURI = 'cid/test2.png';
-    newlyMintedToken = await fellasToken.mintaUnPo(recipient, metadataURI, { value: ethers.utils.parseEther('0.0005') });
+    newlyMintedToken = await fellasToken.mintSingleFellas(recipient, metadataURI, { value: ethers.utils.parseEther('0.0005') });
     await newlyMintedToken.wait();
 
     // Verify there are 2 tokens minted
@@ -97,6 +97,39 @@ describe("FellasToken", function () {
 
     // Verify token URI was correctly assigned
     expect(await fellasToken.tokenURI(1)).to.equal(metadataURI);
+  });
+
+  it("Should multi mint if balance is enough and transfer NFTs to recipient", async function () {
+    const FellasToken = await ethers.getContractFactory("FellasToken");
+    const fellasToken = await FellasToken.deploy();
+    await fellasToken.deployed();
+
+    const recipient = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266';
+    let metadataURI_1 = 'cid/1.png';
+    let metadataURI_2 = 'cid/2.png';
+    let metadataURI_3 = 'cid/3.png';
+    let metadataURI_4 = 'cid/4.png';
+    let metadataURI_5 = 'cid/5.png';
+    let URI_array = [metadataURI_1, metadataURI_2, metadataURI_3, metadataURI_4, metadataURI_5]
+
+
+    // Verify recipient owns 0 tokens
+    let balance = await fellasToken.balanceOf(recipient);
+    expect(balance).to.equal(0);
+
+    // Mint 1st token to the recipient
+    let mintedTokens = await fellasToken.mintMultiFellas(recipient, URI_array, 5, { value: ethers.utils.parseEther('0.003') });
+    await mintedTokens.wait();
+
+    // Verify there is 1 token minted
+    expect(await fellasToken.count()).to.equal(5);
+
+    // Veirify recipient owns 1 token
+    balance = await fellasToken.balanceOf(recipient);
+    expect(balance).to.equal(5);
+
+    // Verify token URI was correctly assigned
+    expect(await fellasToken.tokenURI(1)).to.equal(metadataURI_1);
   });
 
   it("Should withdraw if balance is enough and transfer amount to owner", async function () {
