@@ -24,8 +24,11 @@ const isMetamaskConnected = (window.ethereum.selectedAddress) ? true : false;
 function Home() {
 
   const [totalMinted, setTotalMinted] = useState(0);
+  const [contracBalance, setContractBalance] = useState(0);
+
   useEffect(() => {
     getCount();
+    getContractBalance();
   }, []);
 
   const getCount = async () => {
@@ -38,16 +41,51 @@ function Home() {
     setTotalMinted(parseInt(count));
   };
 
+  const getContractBalance = async () => {
+    if (!isMetamaskConnected) {
+      return;
+    }
+
+    setContractBalance(ethers.utils.formatEther(await contract.getBalance()));
+  };
+
+  const withdrawBalance = async () => {
+    try {
+        const result = await contract.withdraw();
+        await result.wait();
+    } catch (error) {
+        console.log(error)
+        alert(error);
+    }
+
+    getContractBalance();
+  };
+
   return (
     <div>
       <WalletBalance />
 
-      <h1>Fellas Token NFT Collection</h1>
-      <ul>
-        <li>Free Mint only VIP</li>
-        <li>Whitelist (first 20) at ETH 0.0001</li>
-        <li>Mint at ETH 0.0005</li>
-      </ul>
+      <div className="row">
+        <div className="col-sm">
+                
+            <h1>Fellas Token NFT Collection</h1>
+          <ul>
+            <li>Free Mint only VIP</li>
+            <li>Whitelist (first 20) at ETH 0.0001</li>
+            <li>Mint at ETH 0.0005</li>
+          </ul>
+        </div>
+        <div className="col-sm">
+          <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Contract Balance: {contracBalance} Ether</h5>
+                <button className="btn btn-success" onClick={() => withdrawBalance()}>Withdraw</button>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      
       <div className="container">
         <div className="row">
           {Array(totalMinted + 2)
