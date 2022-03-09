@@ -17,6 +17,8 @@ const signer = provider.getSigner();
 // get the smart contract (FellasToken Contract)
 const contract = new ethers.Contract(contractAddress, FellasToken.abi, signer);
 
+// Verify metamask is connected to a valid address
+const isMetamaskConnected = (window.ethereum.selectedAddress) ? true : false;
 
 
 function Home() {
@@ -27,6 +29,10 @@ function Home() {
   }, []);
 
   const getCount = async () => {
+    if (!isMetamaskConnected) {
+      return;
+    }
+
     const count = await contract.count();
     console.log('Token count = ' + parseInt(count));
     setTotalMinted(parseInt(count));
@@ -72,6 +78,10 @@ function NFTImage({ tokenId, getCount }) {
   }, [isMinted]);
 
   const getMintedStatus = async () => {
+    if (!isMetamaskConnected) {
+      return;
+    }
+
     const result = await contract.isContentOwned(metadataURI);
     // console.log('TokenID = ' + tokenId + ', IsContentOwned = ' + result);
     setIsMinted(result);
